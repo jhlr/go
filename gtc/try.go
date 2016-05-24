@@ -1,31 +1,31 @@
-package gtc
+package tc
 
 import "fmt"
 
 type Error struct {
-	Interface interface{}
+	inte interface{}
 }
 
 func (e Error) Println() {
-	if e.Interface != nil {
-		fmt.Println(e.Interface)
+	if e.inte != nil {
+		fmt.Println(e.inte)
 	}
 }
 
 func (e Error) Panic() {
-	if e.Interface != nil {
-		panic(e.Interface)
+	if e.inte != nil {
+		panic(e.inte)
 	}
 }
 
 func (e Error) String() string {
-	return fmt.Sprint(e.Interface)
+	return fmt.Sprint(e.inte)
 }
 
 func Try(try func()) (e Error) {
 	if try != nil {
 		defer func() {
-			e.Interface = recover()
+			e.inte = recover()
 		}()
 		try()
 	}
@@ -33,13 +33,13 @@ func Try(try func()) (e Error) {
 }
 
 func (e Error) React(react func()) {
-	if e.Interface != nil && react != nil {
+	if e.inte != nil && react != nil {
 		react()
 	}
 }
 
 func (e Error) Catch(catch func(interface{})) {
-	if e.Interface != nil && catch != nil {
-		catch(e.Interface)
+	if e.inte != nil && catch != nil {
+		catch(e.inte)
 	}
 }
