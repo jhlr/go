@@ -7,9 +7,11 @@ import (
 type LogicOp []bool
 
 const (
-	Not = "tf"
-	True = "t"
+	Not   = "tf"
+	True  = "t"
 	False = "f"
+	And = "ffft"
+	Or = "fttt"
 )
 
 func LogicOpString(str string) LogicOp {
@@ -36,9 +38,10 @@ func (op LogicOp) Apply(args ...bool) bool {
 		}
 		inc *= 2
 	}
-	if i >= len(op){
-		fmt.Println(op.String())
-		panic("exp: too many args to LogicOp")
+	if len(op) == 0 {
+		return i > 0
+	} else if i >= len(op) {
+		panic(fmt.Sprintf("exp: (%s) received too many args", op.String()))
 	}
 	return op[i]
 }

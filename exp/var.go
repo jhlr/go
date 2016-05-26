@@ -1,14 +1,14 @@
 package exp
 
-type Variables struct{
+type Variables struct {
 	variables map[uint]uint
-	values []bool
+	values    []bool
 }
 
 func (e *Expression) Variables() *Variables {
 	v := &Variables{
 		variables: make(map[uint]uint),
-		values: nil,
+		values:    nil,
 	}
 	count := e.unique(v, 0)
 	v.values = make([]bool, count)
@@ -48,7 +48,7 @@ func (v *Variables) Set(vname uint, b bool) bool {
 	return true
 }
 
-func (v *Variables) ForEach(iter func(uint,bool)bool) {
+func (v *Variables) ForEach(iter func(uint, bool) bool) {
 	for vname, vcode := range v.variables {
 		v.values[vcode] = iter(vname, v.values[vcode])
 	}
@@ -85,16 +85,17 @@ func (v *Variables) SetAll(b bool) {
 }
 
 func (e *Expression) Apply(v *Variables) bool {
+	args := make([]bool, len(e.args))
 	if vname, ok := e.Var(); ok {
 		b, ok := v.Get(vname)
 		if !ok {
 			return false
 		}
-		return b
-	}
-	args := make([]bool, len(e.args))
-	for i := range args {
-		args[i] = e.args[i].Apply(v)
+		args = append(args, b)
+	} else {
+		for i := range e.args {
+			args[i] = e.args[i].Apply(v)
+		}
 	}
 	return e.op.Apply(args...)
 }
