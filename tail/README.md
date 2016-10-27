@@ -18,7 +18,7 @@ func Factorial(n int, acc int64) interface{} {
 }
 
 func main() {
-	tail.Loop(Factorial(10000, int64(1)))
+	tail.Loop(Factorial(10000, int64(1))).(int64)
 }
 ```
 
