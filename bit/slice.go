@@ -2,9 +2,16 @@ package bit
 
 type Slice []uint8
 
-func New(len uint) Slice {
+func New(len int) Slice {
+	if len < 0 {
+		_ = make([]uint8, len)
+	}
 	s := make([]uint8, len/8+1)
 	return Slice(s)
+}
+
+func (s Slice) Len() int {
+	return len(s)*8
 }
 
 func (s Slice) Fill(val bool) {
