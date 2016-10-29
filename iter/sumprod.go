@@ -1,7 +1,7 @@
 package iter
 
 func Product(iterable interface{}) interface{} {
-	return fold(iterable, Prod)
+	return fold(iterable, Mul)
 }
 
 func Sum(iterable interface{}) interface{} {

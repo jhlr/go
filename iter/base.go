@@ -51,7 +51,7 @@ func Add(a, b interface{}) (result interface{}, ok bool) {
 	case reflect.Map:
 		if ta == tb {
 			res := reflect.MakeMap(ta)
-			it := Setter(res)
+			it := MakeSetter(res)
 			ForEach(va, it)
 			ForEach(vb, it)
 			result = res.Interface()
@@ -78,7 +78,7 @@ func Add(a, b interface{}) (result interface{}, ok bool) {
 	return result, ok
 }
 
-func Prod(a, b interface{}) (result interface{}, ok bool) {
+func Mul(a, b interface{}) (result interface{}, ok bool) {
 	defer recoverBool(&ok)
 	va := valueOf(a)
 	vb := valueOf(b)

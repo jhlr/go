@@ -8,7 +8,7 @@ import (
 var (
 	// panic if the type is not supported
 	errTypeNotSupported = errors.New("type not supported")
-	errNotSlice         = errors.New("interface is not a iterable")
+	errNotSlice         = errors.New("interface is not an iterable")
 )
 
 func recoverBool(ok *bool) {
