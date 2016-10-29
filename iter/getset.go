@@ -94,6 +94,7 @@ func MakeSetter(iterable interface{}) SetFunc {
 		}
 	case reflect.String,
 		reflect.Array:
+		// these types cannot be changed
 		return nil
 	case reflect.Slice:
 		return func(k, v interface{}) (ok bool) {
