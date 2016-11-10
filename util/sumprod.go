@@ -1,4 +1,4 @@
-package iter
+package util
 
 func Product(iterable interface{}) interface{} {
 	return fold(iterable, Mul)
@@ -11,7 +11,7 @@ func Sum(iterable interface{}) interface{} {
 func fold(iterable interface{}, foo func(interface{}, interface{}) (interface{}, bool)) interface{} {
 	var result interface{}
 	var ok bool
-	ok = ForEach(iterable, func(_, v interface{}) bool {
+	ok = For(iterable, func(_, v interface{}) bool {
 		result, ok = foo(result, v)
 		return ok
 	})

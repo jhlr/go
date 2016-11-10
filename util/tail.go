@@ -1,4 +1,4 @@
-package tail
+package util
 
 type Flooper func() interface{}
 

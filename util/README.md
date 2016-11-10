@@ -1,4 +1,4 @@
-Package Tail
+tail.go
 ============
 Implementation of a tail call optimization in go
 
@@ -12,27 +12,27 @@ func Factorial(n int, acc int64) interface{} {
 	}
 
 	// add this wrapper to your tail call
-	return tail.Flooper(func() interface{} {
+	return util.Flooper(func() interface{} {
 		return Factorial(n-1, int64(n)*acc)
 	})
 }
 
 func main() {
-	tail.Loop(Factorial(10000, int64(1))).(int64)
+	util.Loop(Factorial(10000, int64(1))).(int64)
 }
 ```
 
 ### Of course you can make it pretty
 ```go
 func Factorial(n int) int64 {
-	return tail.Loop(factorial(n, int64(1))).(int64)
+	return util.Loop(factorial(n, int64(1))).(int64)
 }
 
 func factorial(n int, acc int64) interface{} {
 	if n <= 0 {
 		return acc
 	}
-	return tail.Flooper(func() interface{} {
+	return util.Flooper(func() interface{} {
 		return factorial(n-1, int64(n)*acc)
 	})
 }
@@ -50,11 +50,11 @@ func Factorial(n int) int64 {
 		if n <= 0 {
 			return acc
 		}
-		return tail.Flooper(func() interface{} {
+		return util.Flooper(func() interface{} {
 			return factorial(n-1, int64(n)*acc)
 		})
 	}
-	return tail.Loop(factorial(n, int64(1))).(int64)
+	return util.Loop(factorial(n, int64(1))).(int64)
 }
 
 func main() {

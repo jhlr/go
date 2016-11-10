@@ -1,4 +1,4 @@
-package iter
+package util
 
 import (
 	"reflect"

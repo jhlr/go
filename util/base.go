@@ -1,4 +1,4 @@
-package iter
+package util
 
 import (
 	"reflect"
@@ -52,8 +52,8 @@ func Add(a, b interface{}) (result interface{}, ok bool) {
 		if ta == tb {
 			res := reflect.MakeMap(ta)
 			it := MakeSetter(res)
-			ForEach(va, it)
-			ForEach(vb, it)
+			For(va, it)
+			For(vb, it)
 			result = res.Interface()
 		} else {
 			ok = false

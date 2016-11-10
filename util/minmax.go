@@ -1,4 +1,4 @@
-package iter
+package util
 
 // Max returns the key of the max element
 func Max(iterable interface{}) interface{} {
@@ -13,7 +13,7 @@ func Min(iterable interface{}) interface{} {
 func minmax(op bool, iterable interface{}) interface{} {
 	var key, minmax interface{}
 	empty := true
-	ok := ForEach(iterable, func(k, v interface{}) bool {
+	ok := For(iterable, func(k, v interface{}) bool {
 		if empty {
 			minmax = v
 			key = k

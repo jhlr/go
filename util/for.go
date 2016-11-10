@@ -1,12 +1,13 @@
-package iter
+package util
 
 import (
 	"reflect"
 )
 
-// ForEach passes the key and the value of each element
+// For passes the key
+// and the value of each element
 // to the given function
-func ForEach(iterable interface{},
+func For(iterable interface{},
 	foo func(interface{}, interface{}) bool) (ok bool) {
 	defer recoverBool(&ok)
 	v := valueOf(iterable)

@@ -1,4 +1,4 @@
-package iter
+package util
 
 import (
 	"errors"
@@ -41,7 +41,7 @@ func IsIterable(i interface{}) bool {
 // Index returns the index of the given element
 func KeyOf(iterable interface{}, elem interface{}) (interface{}, bool) {
 	key := interface{}(nil)
-	found := !ForEach(iterable, func(k, v interface{}) bool {
+	found := !For(iterable, func(k, v interface{}) bool {
 		if v == elem {
 			key = k
 			return false
