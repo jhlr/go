@@ -1,11 +1,8 @@
-## iter
-A bunch of tools for iterable data types
+## util
+A bunch of tools to make go an even better language
 
-## tail
-Implementation of a tail call optimization in go
+## nlp
 
-## tc
-Try-Catch in go
 
 ## bit
 Simple BitSlice implementation
