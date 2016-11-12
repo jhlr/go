@@ -41,14 +41,15 @@ func SortInterface(slice interface{}) sort.Interface {
 		return sort.Float64Slice(s)
 	case []string:
 		return sort.StringSlice(s)
+	default:
+		si := new(sortInterface)
+		si.value = valueOf(slice)
+		if si.value.Kind() == reflect.Array {
+			panic(errNotSlice)
+		}
+		si.Less(0, 0) // checks the type
+		return si
 	}
-	si := new(sortInterface)
-	si.value = valueOf(slice)
-	if si.value.Kind() == reflect.Array {
-		panic(errNotSlice)
-	}
-	si.Less(0, 0) // checks the type
-	return si
 }
 
 // Sort uses reflect to sort the slice

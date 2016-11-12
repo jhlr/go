@@ -13,20 +13,19 @@ func Min(iterable interface{}) interface{} {
 func minmax(op bool, iterable interface{}) interface{} {
 	var key, minmax interface{}
 	empty := true
-	ok := For(iterable, func(k, v interface{}) bool {
+	ok := For(iterable, func(k, v interface{}) {
 		if empty {
 			minmax = v
 			key = k
-			return true
+			return
 		}
 		l, ok := Less(minmax, v)
 		if !ok {
-			return false
+			panic(nil)
 		} else if op == l {
 			minmax = v
 			key = k
 		}
-		return true
 	})
 	if !ok {
 		panic(errTypeNotSupported)

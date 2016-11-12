@@ -51,7 +51,9 @@ func Add(a, b interface{}) (result interface{}, ok bool) {
 	case reflect.Map:
 		if ta == tb {
 			res := reflect.MakeMap(ta)
-			it := MakeSetter(res)
+			it := func(k, v interface{}) {
+				res.SetMapIndex(valueOf(k), valueOf(v))
+			}
 			For(va, it)
 			For(vb, it)
 			result = res.Interface()
@@ -62,8 +64,6 @@ func Add(a, b interface{}) (result interface{}, ok bool) {
 		reflect.Array:
 		if ta == tb {
 			la, lb := va.Len(), vb.Len()
-			va = va.Slice(0, la)
-			vb = vb.Slice(0, lb)
 			r := reflect.MakeSlice(va.Type(), la, la+lb)
 			reflect.Copy(r, va)
 			result = reflect.AppendSlice(r, vb).Interface()

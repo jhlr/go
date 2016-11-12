@@ -7,8 +7,7 @@ import (
 // For passes the key
 // and the value of each element
 // to the given function
-func For(iterable interface{},
-	foo func(interface{}, interface{}) bool) (ok bool) {
+func For(iterable interface{}, foo func(interface{}, interface{})) (ok bool) {
 	defer recoverBool(&ok)
 	v := valueOf(iterable)
 	var length int
@@ -33,12 +32,10 @@ func For(iterable interface{},
 			if !ok {
 				return true
 			}
-			if !foo(i, value.Interface()) {
-				return false
-			}
+			foo(i, value.Interface())
 		}
 	default:
-		return false
+		panic(errTypeNotSupported)
 	}
 
 	var key interface{}
@@ -56,9 +53,7 @@ func For(iterable interface{},
 			reflect.String:
 			key, value = i, v.Index(i)
 		}
-		if !foo(key, value) {
-			return false
-		}
+		foo(key, value)
 	}
 	return true
 }

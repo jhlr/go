@@ -40,13 +40,12 @@ func IsIterable(i interface{}) bool {
 
 // Index returns the index of the given element
 func KeyOf(iterable interface{}, elem interface{}) (interface{}, bool) {
-	key := interface{}(nil)
-	found := !For(iterable, func(k, v interface{}) bool {
+	var key interface{}
+	found := !For(iterable, func(k, v interface{}) {
 		if v == elem {
 			key = k
-			return false
+			panic(nil)
 		}
-		return true
 	})
 	return key, found
 }
