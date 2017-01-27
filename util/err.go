@@ -11,9 +11,9 @@ func (e ErrTypeNotSupported) Error() string {
 	return fmt.Sprintf(format, e.obj)
 }
 
-type errForBreak struct{}
+type errBreak struct{}
 
-func (e errForBreak) Error() string {
+func (e errBreak) Error() string {
 	return "util: misuse of the Break function"
 }
 

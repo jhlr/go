@@ -6,7 +6,7 @@ import (
 
 // Break will stop the For without panic
 func Break() {
-	panic(errForBreak{})
+	panic(errBreak{})
 }
 
 // For passes the key and the value of each element to the given function
@@ -16,7 +16,7 @@ func For(iterable interface{}, callback func(interface{}, interface{})) (all boo
 		r := recover()
 		if r != nil {
 			var ok bool
-			_, ok = r.(errForBreak)
+			_, ok = r.(errBreak)
 			if !ok {
 				panic(r)
 			} else {
