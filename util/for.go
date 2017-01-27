@@ -15,12 +15,9 @@ func For(iterable interface{}, callback func(interface{}, interface{})) (all boo
 	defer func() {
 		r := recover()
 		if r != nil {
-			var ok bool
-			_, ok = r.(errBreak)
+			_, ok := r.(errBreak)
 			if !ok {
 				panic(r)
-			} else {
-				all = false
 			}
 		}
 	}()
@@ -52,6 +49,7 @@ func For(iterable interface{}, callback func(interface{}, interface{})) (all boo
 	default:
 		panic(ErrTypeNotSupported{iterable})
 	}
+
 	var key interface{}
 	var value interface{}
 	for i := 0; i < length; i++ {
