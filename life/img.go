@@ -5,67 +5,102 @@ import (
 	"image/color"
 )
 
-type Position image.Point
-
-func P(x, y int) Position {
-	return Position{X: x, Y: y}
+// Pt is a quick way to make a point
+func Pt(x, y int) image.Point {
+	return image.Point{X: x, Y: y}
 }
 
 type img struct {
-	min, max image.Point
-	board    [][]bool
+	color  func(bool) color.Color
+	model  color.Model
+	bounds image.Rectangle
+	board  []bool
 }
 
 func (i img) ColorModel() color.Model {
-	return color.GrayModel
+	return i.model
 }
 
 func (i img) Bounds() image.Rectangle {
-	return image.Rectangle{
-		Min: i.min,
-		Max: i.max,
-	}
+	return i.bounds
 }
 
 func (i img) At(x, y int) color.Color {
-	vx := x >= i.min.X && x < i.max.X
-	vy := y >= i.min.Y && y < i.max.Y
-	x = x - i.min.X
-	y = y - i.min.Y
-	if vx && vy && i.board[y][x] {
+	p := Pt(x, y)
+	if !p.In(i.bounds) {
+		return i.color(false)
+	}
+	b := i.Bounds()
+	w := b.Dx()
+	p = p.Sub(b.Min)
+	return i.color(i.board[p.Y*w+p.X])
+}
+
+func ColorFunc(c color.Color) int {
+	r, g, b, a := c.RGBA()
+	if a>>15 == 0 {
+		return 0
+	}
+	y := (r + g + b) / 3
+	if y >= a/2 {
+		return +1
+	}
+	return -1
+}
+
+func GrayFunc(b bool) color.Color {
+	if b {
 		return color.Gray{255}
 	}
 	return color.Gray{0}
 }
 
-func (u *Universe) Image() image.Image {
-	min, max := u.minMax()
-	max.X++
-	max.Y++
+// Image creates a saved state of the full universe
+func (u *Universe) Image(cm color.Model, cfoo func(bool) color.Color) image.Image {
+	b := u.bounds()
+	w := b.Dx()
+	h := b.Dy()
+	c := u.count % 2
+	bools := make([]bool, h*w)
+	for j := b.Min.Y; j < b.Max.Y; j++ {
+		for i := b.Min.X; i < b.Max.X; i++ {
+			p := Pt(i, j)
+			cell := u.get(p, c)
+			p = p.Sub(b.Min)
+			bools[w*p.Y+p.X] = cell
+		}
+	}
 	return img{
-		min:   image.Point(min),
-		max:   image.Point(max),
-		board: u.Bools(),
+		color:  cfoo,
+		bounds: b,
+		board:  bools,
 	}
 }
 
-func (u *Universe) SetImage(img image.Image) {
+// SetImage will write the contents of the given image
+// callback outputs:
+// >0 force alive
+// =0 keep it how it is
+// <0 force dead
+func (u *Universe) SetImage(img image.Image, alive func(color.Color) int) {
 	b := img.Bounds()
 	count := u.count % 2
 	for i := b.Min.X; i < b.Max.X; i++ {
 		for j := b.Min.Y; j < b.Max.Y; j++ {
-			c := img.At(i, j)
-			c = color.GrayModel.Convert(c)
-			ui8 := c.(color.Gray).Y
-			u.set(P(i, j), count, ui8 >= 128)
+			a := alive(img.At(i, j))
+			if a != 0 {
+				u.set(Pt(i, j), count, a > 0)
+			}
 		}
 	}
-	u.trim()
+	u.Update()
 }
 
-func (u *Universe) minMax() (Position, Position) {
-	u.trim()
-	var min, max Position
+// minMax returns the bounds that include
+// all the living cells
+func (u *Universe) bounds() image.Rectangle {
+	u.Update()
+	var min, max image.Point
 	for p := range u.board {
 		min = p
 		max = p
@@ -85,19 +120,10 @@ func (u *Universe) minMax() (Position, Position) {
 			max.Y = p.Y
 		}
 	}
-	return min, max
-}
-
-func (u *Universe) Bools() [][]bool {
-	min, max := u.minMax()
-	res := make([][]bool, max.Y-min.Y+1)
-	c := u.count % 2
-	for j := min.Y; j <= max.Y; j++ {
-		res[j-min.Y] = make([]bool, max.X-min.X+1)
-		for i := min.X; i <= max.X; i++ {
-			p := P(i, j)
-			res[j-min.Y][i-min.X] = u.get(p, c)
-		}
+	max.X++
+	max.Y++
+	return image.Rectangle{
+		Min: min,
+		Max: max,
 	}
-	return res
 }
