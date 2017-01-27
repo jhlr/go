@@ -8,18 +8,19 @@ func Sum(iterable interface{}) interface{} {
 	return fold(iterable, Add)
 }
 
-func fold(iterable interface{}, foo func(interface{}, interface{}) (interface{}, bool)) interface{} {
+func fold(iterable interface{}, foo func(interface{}, interface{}) interface{}) interface{} {
 	var result interface{}
 	var ok bool
 	ok = For(iterable, func(_, v interface{}) {
-		result, ok = foo(result, v)
-		if !ok {
+		result = foo(result, v)
+		if result == nil {
 			// this stops the loop
-			panic(nil)
+			result = v
+			Break()
 		}
 	})
 	if !ok {
-		panic(errTypeNotSupported)
+		panic(ErrTypeNotSupported{result})
 	}
 	return result
 }

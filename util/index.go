@@ -1,20 +1,6 @@
 package util
 
-import (
-	"errors"
-	"reflect"
-)
-
-var (
-	// panic if the type is not supported
-	errTypeNotSupported = errors.New("type not supported")
-	errNotSlice         = errors.New("interface is not an iterable")
-)
-
-func recoverBool(ok *bool) {
-	r := recover()
-	*ok = r == nil
-}
+import "reflect"
 
 func valueOf(i interface{}) reflect.Value {
 	v, ok := i.(reflect.Value)
@@ -38,13 +24,13 @@ func IsIterable(i interface{}) bool {
 	return false
 }
 
-// Index returns the index of the given element
+// KeyOf returns the index of the given element
 func KeyOf(iterable interface{}, elem interface{}) (interface{}, bool) {
 	var key interface{}
 	found := !For(iterable, func(k, v interface{}) {
 		if v == elem {
 			key = k
-			panic(nil)
+			Break()
 		}
 	})
 	return key, found

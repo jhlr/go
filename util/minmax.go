@@ -21,14 +21,15 @@ func minmax(op bool, iterable interface{}) interface{} {
 		}
 		l, ok := Less(minmax, v)
 		if !ok {
-			panic(nil)
+			minmax = v
+			Break()
 		} else if op == l {
 			minmax = v
 			key = k
 		}
 	})
 	if !ok {
-		panic(errTypeNotSupported)
+		panic(ErrTypeNotSupported{minmax})
 	}
 	return key
 }

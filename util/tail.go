@@ -1,33 +1,39 @@
 package util
 
-type Flooper func() interface{}
+type Looper func() interface{}
 
-func Loop(foo interface{}) interface{} {
+func Loop(res interface{}) interface{} {
 	for {
-		f, ok := foo.(Flooper)
+		lp, ok := res.(Looper)
 		if ok {
-			foo = f()
+			res = lp()
 		} else {
-			return foo
+			return res
 		}
 	}
 }
 
+func (lp Looper) Loop() interface{} {
+	return Loop(lp)
+}
+
 /*
 // change the return type of your function to interface{}
-func Factorial(n int, acc int) interface{} {
+func Factorial(n int, acc int) util.Flooper {
 	if n <= 0 {
-		return acc
+		return util.Looper(func() interface{} {
+			return acc
+		})
 	}
 
 	// add this wrapper to your tail call
-	return util.Flooper(func() interface{} {
+	return util.Looper(func() interface{} {
 		return Factorial(n-1, n*acc)
 	})
 }
 
 func main() {
 	// call with Loop
-	util.Loop(Factorial(10000, 1)).(int)
+	Factorial(10000, 1).Loop().(int)
 }
 */

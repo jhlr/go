@@ -4,11 +4,26 @@ import (
 	"reflect"
 )
 
-// For passes the key
-// and the value of each element
-// to the given function
-func For(iterable interface{}, foo func(interface{}, interface{})) (ok bool) {
-	defer recoverBool(&ok)
+// Break will stop the For without panic
+func Break() {
+	panic(errForBreak{})
+}
+
+// For passes the key and the value of each element to the given function
+// will return true only if all the element were used
+func For(iterable interface{}, callback func(interface{}, interface{})) (all bool) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			var ok bool
+			_, ok = r.(errForBreak)
+			if !ok {
+				panic(r)
+			} else {
+				all = false
+			}
+		}
+	}()
 	v := valueOf(iterable)
 	var length int
 	var keys []reflect.Value
@@ -32,28 +47,27 @@ func For(iterable interface{}, foo func(interface{}, interface{})) (ok bool) {
 			if !ok {
 				return true
 			}
-			foo(i, value.Interface())
+			callback(i, value.Interface())
 		}
 	default:
-		panic(errTypeNotSupported)
+		panic(ErrTypeNotSupported{iterable})
 	}
-
 	var key interface{}
 	var value interface{}
 	for i := 0; i < length; i++ {
 		switch k {
 		case reflect.Map:
-			key, value = keys[i].Interface(),
-				v.MapIndex(keys[i]).Interface()
+			key = keys[i].Interface()
+			value = v.MapIndex(keys[i]).Interface()
 		case reflect.Struct:
-			key, value = typ.Field(i).Name,
-				v.Field(i).Interface()
+			key = typ.Field(i).Name
+			value = v.Field(i).Interface()
 		case reflect.Slice,
 			reflect.Array,
 			reflect.String:
 			key, value = i, v.Index(i)
 		}
-		foo(key, value)
+		callback(key, value)
 	}
 	return true
 }

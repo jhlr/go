@@ -6,35 +6,36 @@ type Error struct {
 	i interface{}
 }
 
-func (e Error) Panic() {
-	if e.i != nil {
-		panic(e.i)
-	}
+func (e Error) Interface() interface{} {
+	return e.i
 }
 
-func (e Error) String() string {
-	return fmt.Sprint(e.i)
+func (e Error) Nil() bool {
+	return e.i == nil
 }
 
-func Try(try func()) Error {
-	var e Error
+func (e Error) Error() string {
+	return fmt.Sprint(e.Interface())
+}
+
+func Try(try func()) (e Error) {
 	if try != nil {
 		defer func() {
 			e.i = recover()
 		}()
 		try()
 	}
-	return e
+	return
 }
 
 func (e Error) React(react func()) {
-	if e.i != nil && react != nil {
+	if !e.Nil() && react != nil {
 		react()
 	}
 }
 
 func (e Error) Recover(rec func(interface{})) {
-	if e.i != nil && rec != nil {
-		rec(e.i)
+	if !e.Nil() && rec != nil {
+		rec(e.Interface())
 	}
 }
