@@ -10,7 +10,8 @@ func Sum(iterable interface{}) interface{} {
 
 func fold(iterable interface{}, foo func(interface{}, interface{}) (interface{}, bool)) interface{} {
 	var result interface{}
-	ok := For(iterable, func(_, v interface{}) {
+	var ok bool
+	ok = For(iterable, func(_, v interface{}) {
 		result, ok = foo(result, v)
 		if !ok {
 			// this stops the loop
