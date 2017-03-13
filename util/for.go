@@ -2,70 +2,112 @@ package util
 
 import (
 	"reflect"
+	"unicode"
 )
 
-// Break will stop the For without panic
-func Break() {
-	panic(errBreak{})
-}
-
-// For passes the key and the value of each element to the given function
-// will return true only if all the element were used
-func For(iterable interface{}, callback func(interface{}, interface{})) (all bool) {
+// For ...
+//   worst of 200 times slower than a normal for-range
+// foo = func(k,e)e?
+//   if iterable is a chan, k=int
+//   return value will be re-assigned
+//   may be called at random
+//   should receive key and elem
+//   may call break
+func For(iterable, foo interface{}) (err interface{}) {
 	defer func() {
-		r := recover()
-		if r != nil {
-			_, ok := r.(errBreak)
-			if !ok {
-				panic(r)
-			}
+		if err != nil {
+			return
+		}
+		err = recover()
+		if err == nil {
+			return
+		}
+		_, ok := err.(BreakSignal)
+		if ok {
+			err = nil
 		}
 	}()
-	v := valueOf(iterable)
-	var length int
-	var keys []reflect.Value
-	var typ reflect.Type
 
-	k := v.Kind()
-	switch k {
-	case reflect.Map:
-		keys = v.MapKeys()
-		length = len(keys)
-	case reflect.Struct:
-		length = v.NumField()
-		typ = v.Type()
-	case reflect.Slice,
-		reflect.Array,
-		reflect.String:
-		length = v.Len()
-	case reflect.Chan:
-		for i := 0; ; i++ {
-			value, ok := v.Recv()
-			if !ok {
-				return true
+	v := valueOf(iterable)
+	t := v.Type()
+	fv := valueOf(foo)
+
+	var et reflect.Type
+	if Catch(func() {
+		et = t.Elem()
+	}) != nil {
+		return TypeError{}
+	}
+
+	checkWith := func(k reflect.Type) {
+		in := []reflect.Type{k, et}
+		switch {
+		case CheckFunc(fv, in, nil):
+		case CheckFunc(fv, in, in[1:]):
+			if !v.CanSet() {
+				panic(TypeError{})
 			}
-			callback(i, value.Interface())
+		default:
+			panic(TypeError{})
+		}
+	}
+	call := func(k, v reflect.Value) []reflect.Value {
+		return fv.Call([]reflect.Value{k, v})
+	}
+
+	kind := t.Kind()
+	switch kind {
+	case reflect.Map:
+		checkWith(t.Key())
+		keys := v.MapKeys()
+		length := len(keys)
+		for i := 0; i < length; i++ {
+			k := keys[i]
+			rets := call(k, v.MapIndex(k))
+			if len(rets) == 1 {
+				v.SetMapIndex(k, rets[0])
+			}
+		}
+	case reflect.Struct:
+		checkWith(reflect.TypeOf(""))
+		length := v.NumField()
+		typ := v.Type()
+		for i := 0; i < length; i++ {
+			field := typ.Field(i)
+			if unicode.IsLower(rune(field.Name[0])) {
+				continue
+			}
+			k := reflect.ValueOf(field.Name)
+			rets := call(k, v.Field(i))
+			if len(rets) == 1 {
+				v.FieldByName(field.Name).Set(rets[0])
+			}
+		}
+	case reflect.Chan:
+		checkWith(reflect.TypeOf(int(0)))
+		for i := 0; ; i++ {
+			e, ok := v.Recv()
+			if !ok {
+				break
+			}
+			rets := call(reflect.ValueOf(i), e)
+			if len(rets) == 1 {
+				v.Send(rets[0])
+			}
+		}
+	case reflect.Slice, reflect.Array,
+		reflect.String:
+		checkWith(reflect.TypeOf(int(0)))
+		length := v.Len()
+		for i := 0; i < length; i++ {
+			k := reflect.ValueOf(i)
+			rets := call(k, v.Index(i))
+			if len(rets) == 1 {
+				v.Index(i).Set(rets[0])
+			}
 		}
 	default:
-		panic(ErrTypeNotSupported{iterable})
+		return TypeError{}
 	}
-
-	var key interface{}
-	var value interface{}
-	for i := 0; i < length; i++ {
-		switch k {
-		case reflect.Map:
-			key = keys[i].Interface()
-			value = v.MapIndex(keys[i]).Interface()
-		case reflect.Struct:
-			key = typ.Field(i).Name
-			value = v.Field(i).Interface()
-		case reflect.Slice,
-			reflect.Array,
-			reflect.String:
-			key, value = i, v.Index(i)
-		}
-		callback(key, value)
-	}
-	return true
+	return nil
 }

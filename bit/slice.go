@@ -1,7 +1,9 @@
 package bit
 
+// Slice is a slice of bits
 type Slice []uint8
 
+// New makes a bit slice of given bit capacity
 func New(len int) Slice {
 	if len < 0 {
 		_ = make([]uint8, len)
@@ -10,10 +12,12 @@ func New(len int) Slice {
 	return Slice(s)
 }
 
+// Len is the bit capacity
 func (s Slice) Len() int {
-	return len(s)*8
+	return len(s) * 8
 }
 
+// Fill sets all bits as the given value
 func (s Slice) Fill(val bool) {
 	mask := uint8(0)
 	if val {
@@ -24,6 +28,7 @@ func (s Slice) Fill(val bool) {
 	}
 }
 
+// Set sets individual bits
 func (s Slice) Set(i uint, val bool) {
 	mask := uint8(1 << (i % 8))
 	if val {
@@ -33,25 +38,15 @@ func (s Slice) Set(i uint, val bool) {
 	}
 }
 
+// Get gets individual bits
 func (s Slice) Get(i uint) bool {
 	mask := uint8(1 << (i % 8))
 	return s[i/8]&mask != 0
 }
 
+// Copy will allocate an exact copy
 func (s Slice) Copy() Slice {
 	result := make([]uint8, len(s))
 	copy(result, s)
-	return result
-}
-
-func (s Slice) HashCode() uint32 {
-	const (
-		init uint32 = 5381
-		mnum uint32 = 33
-	)
-	result := init
-	for _, c := range s {
-		result = result*mnum + uint32(c)
-	}
 	return result
 }

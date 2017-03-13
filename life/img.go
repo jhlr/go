@@ -10,6 +10,7 @@ func Pt(x, y int) image.Point {
 	return image.Point{X: x, Y: y}
 }
 
+// img implements the image.Image interface
 type img struct {
 	color  func(bool) color.Color
 	model  color.Model
@@ -36,6 +37,8 @@ func (i img) At(x, y int) color.Color {
 	return i.color(i.board[p.Y*w+p.X])
 }
 
+// ColorFunc is a simple callback
+// for the SetImage function
 func ColorFunc(c color.Color) int {
 	r, g, b, a := c.RGBA()
 	if a>>15 == 0 {
@@ -48,6 +51,8 @@ func ColorFunc(c color.Color) int {
 	return -1
 }
 
+// GrayFunc is a simple callback
+// for the Image function
 func GrayFunc(b bool) color.Color {
 	if b {
 		return color.Gray{255}

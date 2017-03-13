@@ -5,12 +5,14 @@ import "image"
 // cellsize has to be >=2
 const cellsize = 2
 
+// Universe is the main object
 type Universe struct {
 	rule  Rule
 	count uint
 	board map[image.Point][cellsize + 1]bool
 }
 
+// New creates a blank Universe with the given rules
 func New(r Rule) *Universe {
 	u := new(Universe)
 	u.rule = r
@@ -19,6 +21,7 @@ func New(r Rule) *Universe {
 	return u
 }
 
+// Next will advance a stage for each call
 func (u *Universe) Next() {
 	s := u.count % cellsize
 	for p := range u.board {
@@ -33,6 +36,8 @@ func (u *Universe) Next() {
 	u.Update()
 }
 
+// Around will iterate through the points around the given point
+// (the given point is included)
 func (u *Universe) Around(p image.Point, foo func(image.Point)) {
 	for i := -1; i <= 1; i++ {
 		for j := -1; j <= 1; j++ {
@@ -42,22 +47,27 @@ func (u *Universe) Around(p image.Point, foo func(image.Point)) {
 	}
 }
 
+// Set will set the aliveness of an individual cell
 func (u *Universe) Set(p image.Point, b bool) {
 	u.set(p, u.count%cellsize, b)
 }
 
+// Get gets the status of an individual cell
 func (u *Universe) Get(p image.Point) bool {
 	return u.get(p, u.count%cellsize)
 }
 
+// Count counts the number of past stages
 func (u *Universe) Count() uint {
 	return u.count
 }
 
+// Rule returns the underlying rule
 func (u *Universe) Rule() Rule {
 	return u.rule
 }
 
+// Update will remove unused space
 func (u *Universe) Update() {
 	s := u.count % cellsize
 	for p := range u.board {
@@ -80,6 +90,7 @@ func (u *Universe) set(p image.Point, s uint, b bool) {
 	u.board[p] = cell
 }
 
+// foresee will return the next stage of a cell
 func (u *Universe) foresee(p image.Point, s uint) bool {
 	alive := 0
 	u.Around(p, func(q image.Point) {
