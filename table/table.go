@@ -52,6 +52,7 @@ func (f CompareFunc) Compare(ka, kb interface{}) int {
 
 // Hasher is the interface for hash functions
 type Hasher interface {
+	Comparator
 	// if the slice is to be modified or stored by the map,
 	// it will be copied
 	Hash(interface{}) []byte
@@ -121,11 +122,4 @@ type KeyError struct{}
 
 func (e KeyError) Error() string {
 	return "given key is inadequate"
-}
-
-// Break is to be thrown from inside a loop
-type Break struct{}
-
-func (e Break) Error() string {
-	return "table: uncaught Break"
 }
