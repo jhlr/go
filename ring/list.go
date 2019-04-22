@@ -1,10 +1,8 @@
 package ring
 
 type List struct {
-	head *Ring
-	last *Ring
-	len  int
-	cap  int
+	head, last *Ring
+	len, cap   int
 }
 
 func NewList(n int) *List {

@@ -1,34 +1,34 @@
-package tree
+package table
 
-type node struct {
+type nodet struct {
 	key, elem interface{}
-	link      [2]*node
+	link      [2]*nodet
 	height    int
 }
 
-func (n *node) Key() interface{} {
+func (n *nodet) Key() interface{} {
 	return n.key
 }
 
-func (n *node) Elem() interface{} {
+func (n *nodet) Elem() interface{} {
 	return n.elem
 }
 
-func (n *node) Set(e interface{}) {
+func (n *nodet) Set(e interface{}) {
 	n.elem = e
 }
 
-func (n *node) Fixed() *node {
-	rotate := func(nd *node, d int) *node {
+func (n *nodet) fixed() *nodet {
+	rotate := func(nd *nodet, d int) *nodet {
 		temp := nd.link[1-d]
 		nd.link[1-d] = temp.link[d]
 		temp.link[d] = nd
 
-		nd.Balance()
-		temp.Balance()
+		nd.balance()
+		temp.balance()
 		return temp
 	}
-	b := n.Balance()
+	b := n.balance()
 	if b < 2 && b > -2 {
 		return n
 	}
@@ -36,14 +36,14 @@ func (n *node) Fixed() *node {
 	if b > 0 {
 		h = 1
 	}
-	b *= n.link[h].Balance()
+	b *= n.link[h].balance()
 	if b < 0 {
 		n.link[h] = rotate(n.link[h], h)
 	}
 	return rotate(n, 1-h)
 }
 
-func (n *node) Balance() int {
+func (n *nodet) balance() int {
 	if n == nil {
 		return 0
 	}

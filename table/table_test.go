@@ -2,13 +2,10 @@ package table
 
 import (
 	"math/rand"
-	"table"
-	"table/hash"
-	"table/tree"
 	"testing"
 )
 
-func tableOps(b *testing.B, t table.Interface) {
+func benchmark(b *testing.B, t Interface) {
 	var p []int
 	add := func(b *testing.B) {
 		for k, e := range p {
@@ -48,16 +45,16 @@ func tableOps(b *testing.B, t table.Interface) {
 	})
 }
 
-var codefoo = table.CodeFunc(intFunc)
+var codefoo = CodeFunc(intFunc)
 
 func intFunc(a interface{}) uint64 {
 	return uint64(a.(int))
 }
 
 func BenchmarkTree(b *testing.B) {
-	tableOps(b, tree.New(codefoo))
+	benchmark(b, NewTree(codefoo))
 }
 
 func BenchmarkHash(b *testing.B) {
-	tableOps(b, hash.New(307, codefoo))
+	benchmark(b, NewHash(307, codefoo))
 }

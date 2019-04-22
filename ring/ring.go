@@ -1,24 +1,28 @@
 package ring
 
+// Ring is a single linked list
 type Ring struct {
 	Value interface{}
 	next  *Ring
 }
 
+// New will make a ring with N elements
 func New(n int) *Ring {
 	if n <= 0 {
 		return nil
 	}
 	r := new(Ring)
-	p := r
+	temp := r
 	for i := 1; i < n; i++ {
-		p.next = new(Ring)
-		p = p.next
+		temp.next = new(Ring)
+		temp = temp.next
 	}
-	p.next = r
+	temp.next = r
 	return r
 }
 
+// Len rotates the ring counting the elements.
+// Complexity of O(n)
 func (r *Ring) Len() int {
 	i := 0
 	temp := r
@@ -32,6 +36,8 @@ func (r *Ring) Len() int {
 	return i
 }
 
+// Move will rotate R to the given side.
+// Negative I will call r.Len()
 func (r *Ring) Move(i int) *Ring {
 	if r == nil {
 		return nil
@@ -48,19 +54,22 @@ func (r *Ring) Move(i int) *Ring {
 	return r
 }
 
-func (r *Ring) Link(nd *Ring) *Ring {
-	if nd == nil {
+// Link will insert other between r and r.next
+func (r *Ring) Link(other *Ring) *Ring {
+	if other == nil {
 		return r
 	} else if r == nil {
-		return nd
+		return other
 	}
-	last := nd.Move(-1)
+	last := other.Move(-1)
 	temp := r.next
-	r.next = nd
+	r.next = other
 	last.next = temp
 	return temp
 }
 
+// Unlink will select N elements forward or backwards
+// remove them from R and make a new ring with them
 func (r *Ring) Unlink(n int) *Ring {
 	if n == 0 {
 		return nil
@@ -75,11 +84,4 @@ func (r *Ring) Unlink(n int) *Ring {
 	r.next = last.next
 	last.next = first
 	return first
-}
-
-func (r *Ring) Do(f func(interface{})) {
-	for r != nil {
-		f(r.Value)
-		r = r.next
-	}
 }

@@ -1,56 +1,45 @@
-package tree
+package table
 
-import (
-	"sync"
-	"table"
-)
-
-const MinSize = 0
-
-// treeTable is a synchronized binary avl map.
+// tree is a synchronized binary avl map.
 // It compares its elements using the given
 // CompareFunc. It does not make use of the
 // reflect package.
-type treeTable struct {
-	mtx  sync.RWMutex
-	comp table.Comparator
-	root *node
+type tree struct {
+	comp Comparator
+	root *nodet
 	size int
 }
 
-// New ...
+// NewTree ...
 // cmp = func(k,k)int
 //   should have deterministic returns
-func New(cmp table.Comparator) table.Interface {
-	return &treeTable{comp: cmp}
+func NewTree(cmp Comparator) Interface {
+	return &tree{comp: cmp}
 }
 
 // Len returns the size of the map
-func (t *treeTable) Len() int {
+func (t *tree) Len() int {
 	return t.size
 }
 
 // Add will create a node and Link it to the Map
 // using the given key.
-func (t *treeTable) Add(k interface{}) table.Node {
-	t.mtx.Lock()
-	defer t.mtx.Unlock()
-	var nd *node
-
-	var add func(*node) *node
-	add = func(self *node) *node {
+func (t *tree) Add(k interface{}) Node {
+	var nd *nodet
+	var add func(*nodet) *nodet
+	add = func(self *nodet) *nodet {
 		if self == nil {
 			t.size++
-			nd = &node{key: k}
+			nd = &nodet{key: k}
 			return nd
 		}
 		i := t.comp.Compare(self.Key(), k)
 		if i > 0 {
 			self.link[0] = add(self.link[0])
-			return self.Fixed()
+			return self.fixed()
 		} else if i < 0 {
 			self.link[1] = add(self.link[1])
-			return self.Fixed()
+			return self.fixed()
 		}
 		nd = self
 		return self
@@ -60,13 +49,10 @@ func (t *treeTable) Add(k interface{}) table.Node {
 	return nd
 }
 
-func (t *treeTable) Remove(k interface{}) bool {
-	t.mtx.Lock()
-	defer t.mtx.Unlock()
-
+func (t *tree) Remove(k interface{}) bool {
 	found := false
-	var remove func(*node) *node
-	remove = func(self *node) *node {
+	var remove func(*nodet) *nodet
+	remove = func(self *nodet) *nodet {
 		if self == nil {
 			return nil
 		}
@@ -77,7 +63,7 @@ func (t *treeTable) Remove(k interface{}) bool {
 				d = 1
 			}
 			self.link[d] = remove(self.link[d])
-			return self.Fixed()
+			return self.fixed()
 		}
 		found = true
 		for i := range self.link {
@@ -85,7 +71,7 @@ func (t *treeTable) Remove(k interface{}) bool {
 				return self.link[1-i]
 			}
 		}
-		var p *node
+		var p *nodet
 		n := self.link[1]
 		for n.link[0] != nil {
 			p = n
@@ -109,9 +95,7 @@ func (t *treeTable) Remove(k interface{}) bool {
 
 // Node will return the node with the given key.
 // It will be nil if not found.
-func (t *treeTable) Node(k interface{}) table.Node {
-	t.mtx.RLock()
-	defer t.mtx.RUnlock()
+func (t *tree) Node(k interface{}) Node {
 	nd := t.root
 	for {
 		if nd == nil {
@@ -131,11 +115,9 @@ func (t *treeTable) Node(k interface{}) table.Node {
 // Do will loop through all the nodes of the Map.
 // Any operations that modify the map should run
 // in another goroutine.
-func (t *treeTable) Do(f func(table.Node)) {
-	t.mtx.RLock()
-	defer t.mtx.RUnlock()
-	var do func(*node)
-	do = func(nd *node) {
+func (t *tree) Do(f func(Node)) {
+	var do func(*nodet)
+	do = func(nd *nodet) {
 		for nd != nil {
 			if f != nil {
 				f(nd)
