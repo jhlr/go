@@ -25,6 +25,8 @@ func NewHash(size int, h Hasher) Interface {
 	}
 	if size < MinSize {
 		size = MinSize
+	} else if size%2 == 0 {
+		size++
 	}
 	t.data = make([]*nodeh, size)
 	return t
@@ -63,8 +65,9 @@ func (t *hash) Add(k interface{}) Node {
 		}
 		return new
 	})
-
-	t.grow()
+	if t.grows && t.Len() > 3*len(t.data) {
+		t.grow()
+	}
 	return new
 }
 
@@ -77,6 +80,7 @@ func (t *hash) Do(f func(Node)) {
 		nd := t.data[i]
 		for nd != nil {
 			nxt := nd.next
+			// F can change nd.next
 			f(nd)
 			nd = nxt
 		}
@@ -86,11 +90,11 @@ func (t *hash) Do(f func(Node)) {
 // find will call f if the node with
 // the given key is found
 func (t *hash) find(k interface{}, f func(*nodeh) *nodeh) {
-	h := t.hash.Code(k) % uint64(len(t.data))
+	h := t.hash.Hash(k) % uint64(len(t.data))
 	var prev *nodeh
 	nd := t.data[h]
 	for nd != nil {
-		if nd.Key() == k {
+		if t.hash.Compare(nd.Key(), k) == 0 {
 			break
 		}
 		prev = nd
@@ -104,18 +108,18 @@ func (t *hash) find(k interface{}, f func(*nodeh) *nodeh) {
 }
 
 func (t *hash) grow() {
-	if !t.grows || t.Len() < 2*len(t.data) {
-		return
-	}
 	l := len(t.data)*3 - 2
 	newdata := make([]*nodeh, l)
 	t.Do(func(temp Node) {
 		nd := temp.(*nodeh)
+		// can delete the pointer, it is saved
 		nd.next = nil
-		h := t.hash.Code(nd.Key()) % uint64(l)
+		h := t.hash.Hash(nd.Key()) % uint64(l)
 		if newdata[h] == nil {
+			// list is empty, just add
 			newdata[h] = nd
 		} else {
+			// add at the end of list
 			last := newdata[h]
 			for last.next != nil {
 				last = last.next

@@ -1,11 +1,5 @@
 package table
 
-import (
-	"encoding/binary"
-	"hash/fnv"
-	"math/big"
-)
-
 // Node is for manipulating the nodes
 // and its values. The key is fixed.
 // No way of breaking the map using this interface.
@@ -53,46 +47,16 @@ func (f CompareFunc) Compare(ka, kb interface{}) int {
 // Hasher is the interface for hash functions
 type Hasher interface {
 	Comparator
-	// if the slice is to be modified or stored by the map,
-	// it will be copied
-	Hash(interface{}) []byte
-	Code(interface{}) uint64
+	Hash(interface{}) uint64
 }
 
-// HashFunc returns a number that ideally
-// represents only the given key
-// if the slice is numeric, it should be in BigEndian
-type HashFunc func(k interface{}) []byte
-
-// Compare only calls the wrapped HashFunc with each key
-// and compares their values, respecting the Comparator interface
-func (f HashFunc) Compare(ka, kb interface{}) int {
-	ha := f(ka)
-	hb := f(kb)
-	a := new(big.Int).SetBytes(ha)
-	b := new(big.Int).SetBytes(hb)
-	return a.Cmp(b)
-}
-
-// Hash will just return the result of the call
-func (f HashFunc) Hash(k interface{}) []byte {
-	return f(k)
-}
-
-// Code will calculate the FNV sum of the returned byte slice
-func (f HashFunc) Code(k interface{}) uint64 {
-	h := fnv.New64()
-	h.Write(f(k))
-	return h.Sum64()
-}
-
-// CodeFunc returns a 64bit number that ideally only
+// HashFunc returns a 64bit number that ideally only
 // represents the given key
-type CodeFunc func(k interface{}) uint64
+type HashFunc func(k interface{}) uint64
 
 // Compare will simply compare the returned values
 // from the function calls
-func (f CodeFunc) Compare(ka, kb interface{}) int {
+func (f HashFunc) Compare(ka, kb interface{}) int {
 	ha := f(ka)
 	hb := f(kb)
 	switch {
@@ -104,15 +68,8 @@ func (f CodeFunc) Compare(ka, kb interface{}) int {
 	return 0
 }
 
-// Hash will rewrite the returned number in BigEndian
-func (f CodeFunc) Hash(k interface{}) []byte {
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, f(k))
-	return b
-}
-
-// Code will return the result of the call
-func (f CodeFunc) Code(k interface{}) uint64 {
+// Hash will return the result of the call
+func (f HashFunc) Hash(k interface{}) uint64 {
 	return f(k)
 }
 

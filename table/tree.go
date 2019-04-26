@@ -22,29 +22,33 @@ func (t *tree) Len() int {
 	return t.size
 }
 
-// Add will create a node and Link it to the Map
-// using the given key.
+// Add will create or find a node with the given
+// key and return it. If list is empty, the given
+// key will be compared to itself.
 func (t *tree) Add(k interface{}) Node {
 	var nd *nodet
 	var add func(*nodet) *nodet
 	add = func(self *nodet) *nodet {
 		if self == nil {
+			// found an open leaf
 			t.size++
 			nd = &nodet{key: k}
 			return nd
 		}
 		i := t.comp.Compare(self.Key(), k)
-		if i > 0 {
-			self.link[0] = add(self.link[0])
-			return self.fixed()
+		if i == 0 {
+			nd = self
+			return self
 		} else if i < 0 {
 			self.link[1] = add(self.link[1])
-			return self.fixed()
+		} else {
+			self.link[0] = add(self.link[0])
 		}
-		nd = self
-		return self
+		return self.fixed()
 	}
-
+	if t.root == nil {
+		t.comp.Compare(k, k)
+	}
 	t.root = add(t.root)
 	return nd
 }
@@ -85,8 +89,8 @@ func (t *tree) Remove(k interface{}) bool {
 		n.link = self.link
 		return n
 	}
-
 	t.root = remove(t.root)
+
 	if found {
 		t.size--
 	}

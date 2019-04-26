@@ -19,28 +19,36 @@ func (n *nodet) Set(e interface{}) {
 }
 
 func (n *nodet) fixed() *nodet {
-	rotate := func(nd *nodet, d int) *nodet {
-		temp := nd.link[1-d]
-		nd.link[1-d] = temp.link[d]
-		temp.link[d] = nd
-
-		nd.balance()
-		temp.balance()
-		return temp
+	if n == nil {
+		return nil
 	}
 	b := n.balance()
 	if b < 2 && b > -2 {
 		return n
 	}
+
 	h := 0
-	if b > 0 {
+	if b >= 2 {
 		h = 1
 	}
 	b *= n.link[h].balance()
 	if b < 0 {
-		n.link[h] = rotate(n.link[h], h)
+		n.link[h] = n.link[h].rotated(h)
 	}
-	return rotate(n, 1-h)
+	return n.rotated(1 - h)
+}
+
+func (n *nodet) rotated(d int) *nodet {
+	if n == nil {
+		return nil
+	}
+	temp := n.link[1-d]
+	n.link[1-d] = temp.link[d]
+	temp.link[d] = n
+
+	n.balance()
+	temp.balance()
+	return temp
 }
 
 func (n *nodet) balance() int {
@@ -48,9 +56,9 @@ func (n *nodet) balance() int {
 		return 0
 	}
 	h := [2]int{0, 0}
-	for i, nd := range n.link {
-		if nd != nil {
-			h[i] = nd.height
+	for i := range n.link {
+		if n.link[i] != nil {
+			h[i] = n.link[i].height
 		}
 	}
 	max := h[0]
