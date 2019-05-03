@@ -1,10 +1,10 @@
 package table
 
-// tree is a synchronized binary avl map.
+// treeTable is a synchronized binary avl map.
 // It compares its elements using the given
 // CompareFunc. It does not make use of the
 // reflect package.
-type tree struct {
+type treeTable struct {
 	comp Comparator
 	root *nodet
 	size int
@@ -14,18 +14,18 @@ type tree struct {
 // cmp = func(k,k)int
 //   should have deterministic returns
 func NewTree(cmp Comparator) Interface {
-	return &tree{comp: cmp}
+	return &treeTable{comp: cmp}
 }
 
 // Len returns the size of the map
-func (t *tree) Len() int {
+func (t *treeTable) Len() int {
 	return t.size
 }
 
 // Add will create or find a node with the given
 // key and return it. If list is empty, the given
 // key will be compared to itself.
-func (t *tree) Add(k interface{}) Node {
+func (t *treeTable) Add(k interface{}) Node {
 	var nd *nodet
 	var add func(*nodet) *nodet
 	add = func(self *nodet) *nodet {
@@ -53,7 +53,7 @@ func (t *tree) Add(k interface{}) Node {
 	return nd
 }
 
-func (t *tree) Remove(k interface{}) bool {
+func (t *treeTable) Remove(k interface{}) bool {
 	found := false
 	var remove func(*nodet) *nodet
 	remove = func(self *nodet) *nodet {
@@ -99,7 +99,7 @@ func (t *tree) Remove(k interface{}) bool {
 
 // Node will return the node with the given key.
 // It will be nil if not found.
-func (t *tree) Node(k interface{}) Node {
+func (t *treeTable) Node(k interface{}) Node {
 	nd := t.root
 	for {
 		if nd == nil {
@@ -119,7 +119,7 @@ func (t *tree) Node(k interface{}) Node {
 // Do will loop through all the nodes of the Map.
 // Any operations that modify the map should run
 // in another goroutine.
-func (t *tree) Do(f func(Node)) {
+func (t *treeTable) Do(f func(Node)) {
 	var do func(*nodet)
 	do = func(nd *nodet) {
 		for nd != nil {

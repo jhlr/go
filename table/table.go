@@ -44,32 +44,17 @@ func (f CompareFunc) Compare(ka, kb interface{}) int {
 	return f(ka, kb)
 }
 
-// Hasher is the interface for hash functions
-type Hasher interface {
-	Comparator
-	Hash(interface{}) uint64
+// Hash is the interface for hash functions
+type Hash interface {
+	Sum64(k interface{}) uint64
 }
 
 // HashFunc returns a 64bit number that ideally only
 // represents the given key
 type HashFunc func(k interface{}) uint64
 
-// Compare will simply compare the returned values
-// from the function calls
-func (f HashFunc) Compare(ka, kb interface{}) int {
-	ha := f(ka)
-	hb := f(kb)
-	switch {
-	case ha > hb:
-		return 1
-	case ha < hb:
-		return -1
-	}
-	return 0
-}
-
-// Hash will return the result of the call
-func (f HashFunc) Hash(k interface{}) uint64 {
+// Sum64 will return the result of the call
+func (f HashFunc) Sum64(k interface{}) uint64 {
 	return f(k)
 }
 

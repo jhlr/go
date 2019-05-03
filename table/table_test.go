@@ -45,14 +45,16 @@ func benchmark(b *testing.B, t Interface) {
 	})
 }
 
-func intFunc(a interface{}) uint64 {
-	return uint64(a.(int))
-}
-
 func BenchmarkTree(b *testing.B) {
-	benchmark(b, NewTree(HashFunc(intFunc)))
+	f := CompareFunc(func(ka, kb interface{}) int {
+		return ka.(int) - kb.(int)
+	})
+	benchmark(b, NewTree(f))
 }
 
 func BenchmarkHash(b *testing.B) {
-	benchmark(b, NewHash(47, HashFunc(intFunc)))
+	f := HashFunc(func(k interface{}) uint64 {
+		return uint64(k.(int))
+	})
+	benchmark(b, NewHash(47, f))
 }
